@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, CSSProperties } from 'react';
 import { Container, Row, Col } from 'reactstrap';
 import {
   Navbar,
@@ -11,6 +11,7 @@ import {
 } from 'reactstrap';
 import { Stage, Layer, Rect } from 'react-konva';
 import { fill } from 'lodash';
+import { ChromePicker } from 'react-color'
 
 import './App.css';
 import { KonvaEventObject } from 'konva/types/Node';
@@ -22,19 +23,34 @@ const App = () => {
 
   const [dots, setDots] = useState(fill(Array(gridLength ** 2), 'red'));
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isShowColorPicker, setIsShowColorPicker] = useState(false);
+  const [color, setColor] = useState('#ff0000');
 
   const draw = (i: number) => {
     if (!isDrawing) {
       return;
     }
     const newDots = [...dots];
-    newDots[i] = 'black';
+    newDots[i] = color;
     setDots(newDots);
   };
 
   const onMouseMove = (i: number, e: KonvaEventObject<MouseEvent>) => {
     e.evt.stopPropagation();
     draw(i);
+  };
+
+  const popoverStyle: CSSProperties = {
+    position: 'absolute',
+    zIndex: 2,
+  };
+
+  const coverStyle: CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
   };
 
   return (
@@ -80,7 +96,18 @@ const App = () => {
             </Stage>
           </div>
           </Col>
-          <Col>.col</Col>
+          <Col>
+            <div>
+              <button style={{ background: color, height: '1rem' }} onClick={() => setIsShowColorPicker(!isShowColorPicker)} />
+              { isShowColorPicker ? <div style={popoverStyle}>
+                <div style={coverStyle} onClick={() => setIsShowColorPicker(false)}/>
+                <ChromePicker
+                  color={color}
+                  onChange={(color) => setColor(color.hex)}
+                />
+              </div> : null }
+            </div>          
+          </Col>
         </Row>
       </Container>
     </>
