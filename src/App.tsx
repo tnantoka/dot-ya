@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, CSSProperties, RefObject } from 'react';
+import React, { useState, useRef, CSSProperties, RefObject } from 'react';
 import { Container, Row, Col, Button } from 'reactstrap';
 import {
   Navbar,
@@ -11,7 +11,7 @@ import {
 } from 'reactstrap';
 import { Stage, Layer, Rect } from 'react-konva';
 import { fill } from 'lodash';
-import { ChromePicker } from 'react-color'
+import { ChromePicker } from 'react-color';
 
 import './App.css';
 import { KonvaEventObject } from 'konva/types/Node';
@@ -24,20 +24,12 @@ const App = () => {
   const previewSize = gridLength * 2;
   const previewGridSize = previewSize / gridLength;
 
-
   const [dots, setDots] = useState(fill(Array(gridLength ** 2), 'red'));
   const [isDrawing, setIsDrawing] = useState(false);
   const [isShowColorPicker, setIsShowColorPicker] = useState(false);
   const [color, setColor] = useState('#ff0000');
-  // const [dataURL, setDataURL] = useState('');
 
   const stageRef = useRef() as RefObject<Stage>;
-
-  // useEffect(() => {
-  //   if(stageRef && stageRef.current) {
-  //     setDataURL((stageRef.current as any).toDataURL());
-  //   }
-  // }, [dots]);
 
   const draw = (i: number) => {
     const newDots = [...dots];
@@ -54,7 +46,7 @@ const App = () => {
   };
 
   const download = () => {
-    if(stageRef && stageRef.current) {
+    if (stageRef && stageRef.current) {
       const dataURL = (stageRef.current as any).toDataURL();
       const link = document.createElement('a');
       link.download = 'pixelart.png';
@@ -100,13 +92,17 @@ const App = () => {
       <Container fluid>
         <Row>
           <Col>
-            <div className="d-flex justify-content-center py-4" style={{ background: 'gray' }} onMouseMove={() => setIsDrawing(false)}>
+            <div
+              className="d-flex justify-content-center py-4"
+              style={{ background: 'gray' }}
+              onMouseMove={() => setIsDrawing(false)}
+            >
               <Stage width={canvasSize} height={canvasSize}>
                 <Layer>
                   {dots.map((dot, i) => (
                     <Rect
                       key={i}
-                      x={i % gridLength * gridSize}
+                      x={(i % gridLength) * gridSize}
                       y={Math.floor(i / gridLength) * gridSize}
                       width={gridSize}
                       height={gridSize}
@@ -122,26 +118,34 @@ const App = () => {
                     />
                   ))}
                 </Layer>
-            </Stage>
-          </div>
+              </Stage>
+            </div>
           </Col>
           <Col>
             <div>
-              <button style={{ background: color, height: '1rem' }} onClick={() => setIsShowColorPicker(!isShowColorPicker)} />
-              { isShowColorPicker ? <div style={popoverStyle}>
-                <div style={coverStyle} onClick={() => setIsShowColorPicker(false)}/>
-                <ChromePicker
-                  color={color}
-                  onChange={(color) => setColor(color.hex)}
-                />
-              </div> : null }
+              <button
+                style={{ background: color, height: '1rem' }}
+                onClick={() => setIsShowColorPicker(!isShowColorPicker)}
+              />
+              {isShowColorPicker ? (
+                <div style={popoverStyle}>
+                  <div
+                    style={coverStyle}
+                    onClick={() => setIsShowColorPicker(false)}
+                  />
+                  <ChromePicker
+                    color={color}
+                    onChange={color => setColor(color.hex)}
+                  />
+                </div>
+              ) : null}
             </div>
             <Stage width={previewSize} height={previewSize} ref={stageRef}>
               <Layer>
                 {dots.map((dot, i) => (
                   <Rect
                     key={i}
-                    x={i % gridLength * previewGridSize}
+                    x={(i % gridLength) * previewGridSize}
                     y={Math.floor(i / gridLength) * previewGridSize}
                     width={previewGridSize}
                     height={previewGridSize}
@@ -150,12 +154,14 @@ const App = () => {
                 ))}
               </Layer>
             </Stage>
-            <Button color="primary" onClick={download}>Download</Button>
+            <Button color="primary" onClick={download}>
+              Download
+            </Button>
           </Col>
         </Row>
       </Container>
     </>
   );
-}
+};
 
 export default App;
