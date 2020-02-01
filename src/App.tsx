@@ -24,17 +24,26 @@ const App = () => {
   const previewSize = gridLength * 2;
   const previewGridSize = previewSize / gridLength;
 
-  const [dots, setDots] = useState(fill(Array(gridLength ** 2), 'red'));
+  const [dots, setDots] = useState(fill(Array(gridLength ** 2), '#ffffff'));
   const [isDrawing, setIsDrawing] = useState(false);
   const [isShowColorPicker, setIsShowColorPicker] = useState(false);
-  const [color, setColor] = useState('#ff0000');
+  const [color, setColor] = useState('#000000');
+  const [history, setHistory] = useState([dots]);
+  const [historyStep, setHistoryStep] = useState(0);
 
   const stageRef = useRef() as RefObject<Stage>;
 
   const draw = (i: number) => {
+    if (dots[i] === color) {
+      return;
+    }
     const newDots = [...dots];
     newDots[i] = color;
     setDots(newDots);
+
+    const newHistory = history.slice(0, historyStep + 1).concat([newDots]);
+    setHistory(newHistory);
+    setHistoryStep(historyStep + 1);
   };
 
   const onMouseMove = (i: number, e: KonvaEventObject<MouseEvent>) => {
@@ -55,6 +64,24 @@ const App = () => {
       link.click();
       document.body.removeChild(link);
     }
+  };
+
+  const undo = () => {
+    if (historyStep < 1) {
+      return;
+    }
+    const newStep = historyStep - 1;
+    setHistoryStep(newStep);
+    setDots(history[newStep]);
+  };
+
+  const redo = () => {
+    if (historyStep > history.length - 2) {
+      return;
+    }
+    const newStep = historyStep + 1;
+    setHistoryStep(newStep);
+    setDots(history[newStep]);
   };
 
   const popoverStyle: CSSProperties = {
@@ -156,6 +183,12 @@ const App = () => {
             </Stage>
             <Button color="primary" onClick={download}>
               Download
+            </Button>
+            <Button color="primary" onClick={undo}>
+              <i className="fas fa-undo" />
+            </Button>
+            <Button color="primary" onClick={redo}>
+              <i className="fas fa-redo" />
             </Button>
           </Col>
         </Row>
