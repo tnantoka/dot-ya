@@ -1,4 +1,4 @@
-import React, { useState, CSSProperties } from 'react';
+import React, { useState, useEffect, useRef, CSSProperties, RefObject } from 'react';
 import { Container, Row, Col } from 'reactstrap';
 import {
   Navbar,
@@ -21,15 +21,25 @@ const App = () => {
   const gridLength = 16;
   const gridSize = 300 / gridLength;
 
+  const previewSize = gridLength * 2;
+  const previewGridSize = previewSize / gridLength;
+
+
   const [dots, setDots] = useState(fill(Array(gridLength ** 2), 'red'));
   const [isDrawing, setIsDrawing] = useState(false);
   const [isShowColorPicker, setIsShowColorPicker] = useState(false);
   const [color, setColor] = useState('#ff0000');
+  // const [dataURL, setDataURL] = useState('');
+
+  const stageRef = useRef() as RefObject<Stage>;
+
+  // useEffect(() => {
+  //   if(stageRef && stageRef.current) {
+  //     setDataURL((stageRef.current as any).toDataURL());
+  //   }
+  // }, [dots]);
 
   const draw = (i: number) => {
-    if (!isDrawing) {
-      return;
-    }
     const newDots = [...dots];
     newDots[i] = color;
     setDots(newDots);
@@ -37,6 +47,9 @@ const App = () => {
 
   const onMouseMove = (i: number, e: KonvaEventObject<MouseEvent>) => {
     e.evt.stopPropagation();
+    if (!isDrawing) {
+      return;
+    }
     draw(i);
   };
 
@@ -87,7 +100,11 @@ const App = () => {
                       height={gridSize}
                       fill={dot}
                       stroke={'gray'}
-                      onMouseDown={() => setIsDrawing(true)}
+                      strokeWidth={1}
+                      onMouseDown={() => {
+                        setIsDrawing(true);
+                        draw(i);
+                      }}
                       onMouseUp={() => setIsDrawing(false)}
                       onMouseMove={onMouseMove.bind(null, i)}
                     />
@@ -106,7 +123,21 @@ const App = () => {
                   onChange={(color) => setColor(color.hex)}
                 />
               </div> : null }
-            </div>          
+            </div>
+            <Stage width={previewSize} height={previewSize} ref={stageRef}>
+              <Layer>
+                {dots.map((dot, i) => (
+                  <Rect
+                    key={i}
+                    x={i % gridLength * previewGridSize}
+                    y={Math.floor(i / gridLength) * previewGridSize}
+                    width={previewGridSize}
+                    height={previewGridSize}
+                    fill={dot}
+                  />
+                ))}
+              </Layer>
+            </Stage>
           </Col>
         </Row>
       </Container>
