@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, CSSProperties, RefObject } from 'react';
-import { Container, Row, Col } from 'reactstrap';
+import { Container, Row, Col, Button } from 'reactstrap';
 import {
   Navbar,
   NavbarBrand,
@@ -51,6 +51,18 @@ const App = () => {
       return;
     }
     draw(i);
+  };
+
+  const download = () => {
+    if(stageRef && stageRef.current) {
+      const dataURL = (stageRef.current as any).toDataURL();
+      const link = document.createElement('a');
+      link.download = 'pixelart.png';
+      link.href = dataURL;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   const popoverStyle: CSSProperties = {
@@ -138,6 +150,7 @@ const App = () => {
                 ))}
               </Layer>
             </Stage>
+            <Button color="primary" onClick={download}>Download</Button>
           </Col>
         </Row>
       </Container>
