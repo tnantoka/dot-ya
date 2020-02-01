@@ -9,13 +9,33 @@ import {
   DropdownMenu,
   DropdownItem,
 } from 'reactstrap';
+import { Stage, Layer, Rect } from 'react-konva';
+import { fill } from 'lodash';
 
 import './App.css';
+import { KonvaEventObject } from 'konva/types/Node';
 
 const App = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const canvasSize = 300;
+  const gridLength = 16;
+  const gridSize = 300 / gridLength;
 
-  const toggle = () => setIsOpen(!isOpen);
+  const [dots, setDots] = useState(fill(Array(gridLength ** 2), 'red'));
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  const draw = (i: number) => {
+    if (!isDrawing) {
+      return;
+    }
+    const newDots = [...dots];
+    newDots[i] = 'black';
+    setDots(newDots);
+  };
+
+  const onMouseMove = (i: number, e: KonvaEventObject<MouseEvent>) => {
+    e.evt.stopPropagation();
+    draw(i);
+  };
 
   return (
     <>
@@ -38,7 +58,28 @@ const App = () => {
       </Navbar>
       <Container fluid>
         <Row>
-          <Col>.col</Col>
+          <Col>
+            <div className="d-flex justify-content-center py-4" style={{ background: 'gray' }} onMouseMove={() => setIsDrawing(false)}>
+              <Stage width={canvasSize} height={canvasSize}>
+                <Layer>
+                  {dots.map((dot, i) => (
+                    <Rect
+                      key={i}
+                      x={i % gridLength * gridSize}
+                      y={Math.floor(i / gridLength) * gridSize}
+                      width={gridSize}
+                      height={gridSize}
+                      fill={dot}
+                      stroke={'gray'}
+                      onMouseDown={() => setIsDrawing(true)}
+                      onMouseUp={() => setIsDrawing(false)}
+                      onMouseMove={onMouseMove.bind(null, i)}
+                    />
+                  ))}
+                </Layer>
+            </Stage>
+          </div>
+          </Col>
           <Col>.col</Col>
         </Row>
       </Container>
