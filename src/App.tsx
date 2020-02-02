@@ -5,8 +5,8 @@ import React, {
   RefObject,
   ChangeEvent,
 } from 'react';
-import { Container, Row, Col, Button } from 'reactstrap';
 import {
+  Container, Row, Col, Button,
   Navbar,
   NavbarBrand,
   Nav,
@@ -15,6 +15,8 @@ import {
   DropdownMenu,
   DropdownItem,
   Input,
+  ButtonGroup,
+  ButtonToolbar
 } from 'reactstrap';
 import { Stage, Layer, Rect } from 'react-konva';
 import { fill, chunk, escapeRegExp } from 'lodash';
@@ -23,13 +25,12 @@ import { ChromePicker } from 'react-color';
 import './App.css';
 import { KonvaEventObject } from 'konva/types/Node';
 
+const EYE_DROPPER_COLOR = 'eyedropper';
+
 const App = () => {
   const canvasSize = 300;
-  const gridLength = 16;
+  const gridLength = parseInt(window.location.search.slice(1)) || 16;
   const gridSize = 300 / gridLength;
-
-  const previewSize = gridLength * 2;
-  const previewGridSize = previewSize / gridLength;
 
   const [dots, setDots] = useState(fill(Array(gridLength ** 2), ''));
   const [isDrawing, setIsDrawing] = useState(false);
@@ -41,8 +42,11 @@ const App = () => {
 
   const [pattern, setPattern] = useState('');
   const [replacement, setReplacement] = useState('');
+  const [previewSize, setPreviewSize] = useState(gridLength * 2);
 
   const stageRef = useRef() as RefObject<Stage>;
+
+  const previewGridSize = previewSize / gridLength;
 
   const draw = (i: number) => {
     if (dots[i] === color) {
@@ -139,10 +143,13 @@ const App = () => {
           <Nav className="ml-auto" navbar>
             <UncontrolledDropdown nav inNavbar>
               <DropdownToggle nav caret>
-                16 x 16
+                {gridLength} x {gridLength}
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem tag="a" href="#">
+                <DropdownItem tag="a" href="/" active={gridLength === 16}>
+                  16 x 16
+                </DropdownItem>
+                <DropdownItem tag="a" href="/?32" active={gridLength === 32}>
                   32 x 32
                 </DropdownItem>
               </DropdownMenu>
@@ -174,7 +181,7 @@ const App = () => {
                       stroke={isShowGrid ? '#dee2e6' : ''}
                       strokeWidth={1}
                       onMouseDown={() => {
-                        if (color === 'eyedropper' && dots[i] !== '') {
+                        if (color === EYE_DROPPER_COLOR) {
                           setColor(dots[i]);
                         } else {
                           setIsDrawing(true);
@@ -208,6 +215,25 @@ const App = () => {
                 </div>
               ) : null}
             </div>
+            <ButtonToolbar>
+              <ButtonGroup>
+                <Button color="secondary" onClick={undo}>
+                  <i className="fas fa-undo" />
+                </Button>
+                <Button color="secondary" onClick={redo}>
+                  <i className="fas fa-redo" />
+                </Button>
+                <Button color="secondary" onClick={() => setColor('')} active={color === ''}>
+                  <i className="fas fa-eraser" />
+                </Button>
+                <Button color="secondary" onClick={() => setColor(EYE_DROPPER_COLOR)} active={color === EYE_DROPPER_COLOR}>
+                  <i className="fas fa-eye-dropper" />
+                </Button>
+                <Button color="secondary" onClick={() => setIsShowGrid(!isShowGrid)} active={isShowGrid}>
+                  <i className="fas fa-border-all" />
+                </Button>
+              </ButtonGroup>
+            </ButtonToolbar>
             <div className="d-flex justify-content-left">
               <Stage
                 width={previewSize}
@@ -229,23 +255,16 @@ const App = () => {
                 </Layer>
               </Stage>
             </div>
+            <Input
+              type="number"
+              min="16"
+              value={previewSize.toString()}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setPreviewSize(parseFloat(e.target.value) || previewSize)
+              }
+            />
             <Button color="primary" onClick={download}>
-              Download
-            </Button>
-            <Button color="primary" onClick={undo}>
-              <i className="fas fa-undo" />
-            </Button>
-            <Button color="primary" onClick={redo}>
-              <i className="fas fa-redo" />
-            </Button>
-            <Button color="primary" onClick={() => setColor('')}>
-              Erace
-            </Button>
-            <Button color="primary" onClick={() => setColor('eyedropper')}>
-              Eyedropper
-            </Button>
-            <Button color="primary" onClick={() => setIsShowGrid(!isShowGrid)}>
-              Grid
+              <i className="fas fa-download" />
             </Button>
           </Col>
         </Row>
@@ -256,6 +275,7 @@ const App = () => {
             setPattern(e.target.value)
           }
         />
+        <i className="fas fa-arrow-right" />
         <Input
           value={replacement}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -263,7 +283,7 @@ const App = () => {
           }
         />
         <Button
-          color="primary"
+          color="secondary"
           onClick={() =>
             changeText(
               text.replace(new RegExp(escapeRegExp(pattern), 'g'), replacement)
