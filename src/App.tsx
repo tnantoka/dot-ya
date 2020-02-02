@@ -163,8 +163,12 @@ const App = () => {
                       stroke={'gray'}
                       strokeWidth={1}
                       onMouseDown={() => {
-                        setIsDrawing(true);
-                        draw(i);
+                        if (color === 'eyedropper' && dots[i] !== '') {
+                          setColor(dots[i]);
+                        } else {
+                          setIsDrawing(true);
+                          draw(i);
+                        }
                       }}
                       onMouseUp={() => setIsDrawing(false)}
                       onMouseMove={onMouseMove.bind(null, i)}
@@ -225,6 +229,9 @@ const App = () => {
             </Button>
             <Button color="primary" onClick={() => setColor('')}>
               Erace
+            </Button>
+            <Button color="primary" onClick={() => setColor('eyedropper')}>
+              Eyedropper
             </Button>
           </Col>
         </Row>
