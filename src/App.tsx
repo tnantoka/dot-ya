@@ -6,7 +6,10 @@ import React, {
   ChangeEvent,
 } from 'react';
 import {
-  Container, Row, Col, Button,
+  Container,
+  Row,
+  Col,
+  Button,
   Navbar,
   NavbarBrand,
   Nav,
@@ -16,14 +19,15 @@ import {
   DropdownItem,
   Input,
   ButtonGroup,
-  ButtonToolbar
+  ButtonToolbar,
 } from 'reactstrap';
-import { Stage, Layer, Rect } from 'react-konva';
+import { Stage } from 'react-konva';
 import { fill, chunk, escapeRegExp } from 'lodash';
 import { ChromePicker } from 'react-color';
 
 import './App.css';
 import { KonvaEventObject } from 'konva/types/Node';
+import PixelArea from './components/PixelArea';
 
 const EYE_DROPPER_COLOR = 'eyedropper';
 
@@ -164,36 +168,25 @@ const App = () => {
               className="d-flex justify-content-center py-4"
               onMouseMove={() => setIsDrawing(false)}
             >
-              <Stage
+              <PixelArea
                 width={canvasSize}
                 height={canvasSize}
-                className="bg-white border"
-              >
-                <Layer>
-                  {dots.map((dot, i) => (
-                    <Rect
-                      key={i}
-                      x={(i % gridLength) * gridSize}
-                      y={Math.floor(i / gridLength) * gridSize}
-                      width={gridSize}
-                      height={gridSize}
-                      fill={dot}
-                      stroke={isShowGrid ? '#dee2e6' : ''}
-                      strokeWidth={1}
-                      onMouseDown={() => {
-                        if (color === EYE_DROPPER_COLOR) {
-                          setColor(dots[i]);
-                        } else {
-                          setIsDrawing(true);
-                          draw(i);
-                        }
-                      }}
-                      onMouseUp={() => setIsDrawing(false)}
-                      onMouseMove={onMouseMove.bind(null, i)}
-                    />
-                  ))}
-                </Layer>
-              </Stage>
+                dots={dots}
+                gridLength={gridLength}
+                gridSize={gridSize}
+                isShowGrid={isShowGrid}
+                onMouseDown={(i: number) => {
+                  if (color === EYE_DROPPER_COLOR) {
+                    setColor(dots[i]);
+                  } else {
+                    setIsDrawing(true);
+                    draw(i);
+                  }
+                }}
+                onMouseUp={() => setIsDrawing(false)}
+                onMouseMove={onMouseMove}
+                stageRef={null}
+              />
             </div>
           </Col>
           <Col>
@@ -223,37 +216,42 @@ const App = () => {
                 <Button color="secondary" onClick={redo}>
                   <i className="fas fa-redo" />
                 </Button>
-                <Button color="secondary" onClick={() => setColor('')} active={color === ''}>
+                <Button
+                  color="secondary"
+                  onClick={() => setColor('')}
+                  active={color === ''}
+                >
                   <i className="fas fa-eraser" />
                 </Button>
-                <Button color="secondary" onClick={() => setColor(EYE_DROPPER_COLOR)} active={color === EYE_DROPPER_COLOR}>
+                <Button
+                  color="secondary"
+                  onClick={() => setColor(EYE_DROPPER_COLOR)}
+                  active={color === EYE_DROPPER_COLOR}
+                >
                   <i className="fas fa-eye-dropper" />
                 </Button>
-                <Button color="secondary" onClick={() => setIsShowGrid(!isShowGrid)} active={isShowGrid}>
+                <Button
+                  color="secondary"
+                  onClick={() => setIsShowGrid(!isShowGrid)}
+                  active={isShowGrid}
+                >
                   <i className="fas fa-border-all" />
                 </Button>
               </ButtonGroup>
             </ButtonToolbar>
             <div className="d-flex justify-content-left">
-              <Stage
+              <PixelArea
                 width={previewSize}
                 height={previewSize}
-                ref={stageRef}
-                className="border"
-              >
-                <Layer>
-                  {dots.map((dot, i) => (
-                    <Rect
-                      key={i}
-                      x={(i % gridLength) * previewGridSize}
-                      y={Math.floor(i / gridLength) * previewGridSize}
-                      width={previewGridSize}
-                      height={previewGridSize}
-                      fill={dot}
-                    />
-                  ))}
-                </Layer>
-              </Stage>
+                dots={dots}
+                gridLength={gridLength}
+                gridSize={previewGridSize}
+                isShowGrid={false}
+                onMouseDown={() => {}}
+                onMouseUp={() => {}}
+                onMouseMove={() => {}}
+                stageRef={stageRef}
+              />
             </div>
             <Input
               type="number"
@@ -268,7 +266,12 @@ const App = () => {
             </Button>
           </Col>
         </Row>
-        <Input type="textarea" value={text} onChange={onChangeText} rows={gridLength + 2} />
+        <Input
+          type="textarea"
+          value={text}
+          onChange={onChangeText}
+          rows={gridLength + 2}
+        />
         <Input
           value={pattern}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
