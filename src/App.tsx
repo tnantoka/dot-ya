@@ -1,4 +1,10 @@
-import React, { useState, useRef, CSSProperties, RefObject } from 'react';
+import React, {
+  useState,
+  useRef,
+  CSSProperties,
+  RefObject,
+  ChangeEvent,
+} from 'react';
 import { Container, Row, Col, Button } from 'reactstrap';
 import {
   Navbar,
@@ -8,9 +14,10 @@ import {
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
+  Input,
 } from 'reactstrap';
 import { Stage, Layer, Rect } from 'react-konva';
-import { fill } from 'lodash';
+import { fill, chunk } from 'lodash';
 import { ChromePicker } from 'react-color';
 
 import './App.css';
@@ -41,6 +48,10 @@ const App = () => {
     newDots[i] = color;
     setDots(newDots);
 
+    addHistory(newDots);
+  };
+
+  const addHistory = (newDots: string[]) => {
     const newHistory = history.slice(0, historyStep + 1).concat([newDots]);
     setHistory(newHistory);
     setHistoryStep(historyStep + 1);
@@ -70,16 +81,17 @@ const App = () => {
     if (historyStep < 1) {
       return;
     }
-    const newStep = historyStep - 1;
-    setHistoryStep(newStep);
-    setDots(history[newStep]);
+    loadHistory(historyStep - 1);
   };
 
   const redo = () => {
     if (historyStep > history.length - 2) {
       return;
     }
-    const newStep = historyStep + 1;
+    loadHistory(historyStep + 1);
+  };
+
+  const loadHistory = (newStep: number) => {
     setHistoryStep(newStep);
     setDots(history[newStep]);
   };
@@ -95,6 +107,16 @@ const App = () => {
     right: 0,
     bottom: 0,
     left: 0,
+  };
+
+  const onChangeText = (e: ChangeEvent<HTMLInputElement>) => {
+    try {
+      const newDots = JSON.parse(e.target.value);
+      setDots(newDots);
+      addHistory(newDots);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
@@ -124,7 +146,11 @@ const App = () => {
               style={{ background: 'gray' }}
               onMouseMove={() => setIsDrawing(false)}
             >
-              <Stage width={canvasSize} height={canvasSize}>
+              <Stage
+                width={canvasSize}
+                height={canvasSize}
+                className="bg-white"
+              >
                 <Layer>
                   {dots.map((dot, i) => (
                     <Rect
@@ -167,20 +193,27 @@ const App = () => {
                 </div>
               ) : null}
             </div>
-            <Stage width={previewSize} height={previewSize} ref={stageRef}>
-              <Layer>
-                {dots.map((dot, i) => (
-                  <Rect
-                    key={i}
-                    x={(i % gridLength) * previewGridSize}
-                    y={Math.floor(i / gridLength) * previewGridSize}
-                    width={previewGridSize}
-                    height={previewGridSize}
-                    fill={dot}
-                  />
-                ))}
-              </Layer>
-            </Stage>
+            <div className="d-flex justify-content-left">
+              <Stage
+                width={previewSize}
+                height={previewSize}
+                ref={stageRef}
+                className="border"
+              >
+                <Layer>
+                  {dots.map((dot, i) => (
+                    <Rect
+                      key={i}
+                      x={(i % gridLength) * previewGridSize}
+                      y={Math.floor(i / gridLength) * previewGridSize}
+                      width={previewGridSize}
+                      height={previewGridSize}
+                      fill={dot}
+                    />
+                  ))}
+                </Layer>
+              </Stage>
+            </div>
             <Button color="primary" onClick={download}>
               Download
             </Button>
@@ -190,7 +223,19 @@ const App = () => {
             <Button color="primary" onClick={redo}>
               <i className="fas fa-redo" />
             </Button>
+            <Button color="primary" onClick={() => setColor('')}>
+              Erace
+            </Button>
           </Col>
+        </Row>
+        <Row>
+          <Input
+            type="textarea"
+            value={`[\n${chunk(dots, gridLength)
+              .map(chunkedDots => chunkedDots.map(dot => `"${dot}"`).join(','))
+              .join(',\n')}\n]`}
+            onChange={onChangeText}
+          />
         </Row>
       </Container>
     </>
