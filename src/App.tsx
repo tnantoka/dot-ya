@@ -249,23 +249,19 @@ const App = () => {
             </Button>
           </Col>
         </Row>
-        <Row>
-          <Input type="textarea" value={text} onChange={onChangeText} />
-        </Row>
-        <Row>
-          <Input
-            value={pattern}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setPattern(e.target.value)
-            }
-          />
-          <Input
-            value={replacement}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setReplacement(e.target.value)
-            }
-          />
-        </Row>
+        <Input type="textarea" value={text} onChange={onChangeText} rows={gridLength + 2} />
+        <Input
+          value={pattern}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setPattern(e.target.value)
+          }
+        />
+        <Input
+          value={replacement}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setReplacement(e.target.value)
+          }
+        />
         <Button
           color="primary"
           onClick={() =>
