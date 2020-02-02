@@ -165,7 +165,7 @@ const App = () => {
         <Row>
           <Col>
             <div
-              className="d-flex justify-content-center py-4"
+              className="d-flex justify-content-start py-4"
               onMouseMove={() => setIsDrawing(false)}
             >
               <PixelArea
@@ -190,10 +190,11 @@ const App = () => {
             </div>
           </Col>
           <Col>
-            <div>
+            <div className="mt-4 mb-2">
               <button
-                style={{ background: color, height: '1rem' }}
+                style={{ background: color, width: '1.5rem', height: '1.5rem' }}
                 onClick={() => setIsShowColorPicker(!isShowColorPicker)}
+                className="border"
               />
               {isShowColorPicker ? (
                 <div style={popoverStyle}>
@@ -208,18 +209,19 @@ const App = () => {
                 </div>
               ) : null}
             </div>
-            <ButtonToolbar>
+            <ButtonToolbar className="mb-3">
               <ButtonGroup>
-                <Button color="secondary" onClick={undo}>
+                <Button color="secondary" onClick={undo} size="sm">
                   <i className="fas fa-undo" />
                 </Button>
-                <Button color="secondary" onClick={redo}>
+                <Button color="secondary" onClick={redo} size="sm">
                   <i className="fas fa-redo" />
                 </Button>
                 <Button
                   color="secondary"
                   onClick={() => setColor('')}
                   active={color === ''}
+                  size="sm"
                 >
                   <i className="fas fa-eraser" />
                 </Button>
@@ -227,6 +229,7 @@ const App = () => {
                   color="secondary"
                   onClick={() => setColor(EYE_DROPPER_COLOR)}
                   active={color === EYE_DROPPER_COLOR}
+                  size="sm"
                 >
                   <i className="fas fa-eye-dropper" />
                 </Button>
@@ -234,11 +237,28 @@ const App = () => {
                   color="secondary"
                   onClick={() => setIsShowGrid(!isShowGrid)}
                   active={isShowGrid}
+                  size="sm"
                 >
                   <i className="fas fa-border-all" />
                 </Button>
               </ButtonGroup>
             </ButtonToolbar>
+            <div className="mb-3 d-flex">
+              <Input
+                type="number"
+                min="16"
+                value={previewSize.toString()}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setPreviewSize(parseFloat(e.target.value) || previewSize)
+                }
+                className="mr-2"
+                bsSize="sm"
+                style={{ width: '4rem' }}
+              />
+              <Button color="primary" onClick={download} size="sm">
+                <i className="fas fa-download" />
+              </Button>
+            </div>
             <div className="d-flex justify-content-left">
               <PixelArea
                 width={previewSize}
@@ -253,48 +273,48 @@ const App = () => {
                 stageRef={stageRef}
               />
             </div>
-            <Input
-              type="number"
-              min="16"
-              value={previewSize.toString()}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setPreviewSize(parseFloat(e.target.value) || previewSize)
-              }
-            />
-            <Button color="primary" onClick={download}>
-              <i className="fas fa-download" />
-            </Button>
           </Col>
         </Row>
-        <Input
-          type="textarea"
-          value={text}
-          onChange={onChangeText}
-          rows={gridLength + 2}
-        />
-        <Input
-          value={pattern}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setPattern(e.target.value)
-          }
-        />
-        <i className="fas fa-arrow-right" />
-        <Input
-          value={replacement}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setReplacement(e.target.value)
-          }
-        />
-        <Button
-          color="secondary"
-          onClick={() =>
-            changeText(
-              text.replace(new RegExp(escapeRegExp(pattern), 'g'), replacement)
-            )
-          }
-        >
-          Replace
-        </Button>
+        <div className="mb-3">
+          <Input
+            type="textarea"
+            value={text}
+            onChange={onChangeText}
+            rows={gridLength + 2}
+          />
+        </div>
+        <div className="mb-5 d-flex align-items-center">
+          <Input
+            value={pattern}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setPattern(e.target.value)
+            }
+            bsSize="sm"
+          />
+          <i className="fas fa-arrow-right mx-2" />
+          <Input
+            value={replacement}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setReplacement(e.target.value)
+            }
+            bsSize="sm"
+          />
+          <Button
+            color="secondary"
+            onClick={() =>
+              changeText(
+                text.replace(
+                  new RegExp(escapeRegExp(pattern), 'g'),
+                  replacement
+                )
+              )
+            }
+            size="sm"
+            className="ml-2"
+          >
+            Replace
+          </Button>
+        </div>
       </Container>
     </>
   );
