@@ -37,6 +37,7 @@ const App = () => {
   const [color, setColor] = useState('#000000');
   const [history, setHistory] = useState([dots]);
   const [historyStep, setHistoryStep] = useState(0);
+  const [isShowGrid, setIsShowGrid] = useState(true);
 
   const [pattern, setPattern] = useState('');
   const [replacement, setReplacement] = useState('');
@@ -154,13 +155,12 @@ const App = () => {
           <Col>
             <div
               className="d-flex justify-content-center py-4"
-              style={{ background: 'gray' }}
               onMouseMove={() => setIsDrawing(false)}
             >
               <Stage
                 width={canvasSize}
                 height={canvasSize}
-                className="bg-white"
+                className="bg-white border"
               >
                 <Layer>
                   {dots.map((dot, i) => (
@@ -171,7 +171,7 @@ const App = () => {
                       width={gridSize}
                       height={gridSize}
                       fill={dot}
-                      stroke={'gray'}
+                      stroke={isShowGrid ? '#dee2e6' : ''}
                       strokeWidth={1}
                       onMouseDown={() => {
                         if (color === 'eyedropper' && dots[i] !== '') {
@@ -243,6 +243,9 @@ const App = () => {
             </Button>
             <Button color="primary" onClick={() => setColor('eyedropper')}>
               Eyedropper
+            </Button>
+            <Button color="primary" onClick={() => setIsShowGrid(!isShowGrid)}>
+              Grid
             </Button>
           </Col>
         </Row>
