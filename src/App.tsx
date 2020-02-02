@@ -17,7 +17,7 @@ import {
   Input,
 } from 'reactstrap';
 import { Stage, Layer, Rect } from 'react-konva';
-import { fill, chunk } from 'lodash';
+import { fill, chunk, escapeRegExp } from 'lodash';
 import { ChromePicker } from 'react-color';
 
 import './App.css';
@@ -31,12 +31,15 @@ const App = () => {
   const previewSize = gridLength * 2;
   const previewGridSize = previewSize / gridLength;
 
-  const [dots, setDots] = useState(fill(Array(gridLength ** 2), '#ffffff'));
+  const [dots, setDots] = useState(fill(Array(gridLength ** 2), ''));
   const [isDrawing, setIsDrawing] = useState(false);
   const [isShowColorPicker, setIsShowColorPicker] = useState(false);
   const [color, setColor] = useState('#000000');
   const [history, setHistory] = useState([dots]);
   const [historyStep, setHistoryStep] = useState(0);
+
+  const [pattern, setPattern] = useState('');
+  const [replacement, setReplacement] = useState('');
 
   const stageRef = useRef() as RefObject<Stage>;
 
@@ -110,14 +113,22 @@ const App = () => {
   };
 
   const onChangeText = (e: ChangeEvent<HTMLInputElement>) => {
+    changeText(e.target.value);
+  };
+
+  const changeText = (text: string) => {
     try {
-      const newDots = JSON.parse(e.target.value);
+      const newDots = JSON.parse(text);
       setDots(newDots);
       addHistory(newDots);
     } catch (e) {
       console.error(e);
     }
   };
+
+  const text = `[\n${chunk(dots, gridLength)
+    .map(chunkedDots => chunkedDots.map(dot => `"${dot}"`).join(','))
+    .join(',\n')}\n]`;
 
   return (
     <>
@@ -236,14 +247,32 @@ const App = () => {
           </Col>
         </Row>
         <Row>
+          <Input type="textarea" value={text} onChange={onChangeText} />
+        </Row>
+        <Row>
           <Input
-            type="textarea"
-            value={`[\n${chunk(dots, gridLength)
-              .map(chunkedDots => chunkedDots.map(dot => `"${dot}"`).join(','))
-              .join(',\n')}\n]`}
-            onChange={onChangeText}
+            value={pattern}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setPattern(e.target.value)
+            }
+          />
+          <Input
+            value={replacement}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setReplacement(e.target.value)
+            }
           />
         </Row>
+        <Button
+          color="primary"
+          onClick={() =>
+            changeText(
+              text.replace(new RegExp(escapeRegExp(pattern), 'g'), replacement)
+            )
+          }
+        >
+          Replace
+        </Button>
       </Container>
     </>
   );
