@@ -314,6 +314,22 @@ const App = () => {
           >
             Replace
           </Button>
+          <Button
+            color="primary"
+            onClick={() => {
+              const blob = new Blob([text], { type: 'application/json' });
+              const link = document.createElement('a');
+              link.download = 'pixelart.json';
+              link.href = window.URL.createObjectURL(blob);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }}
+            size="sm"
+            className="ml-2 text-nowrap"
+          >
+            <i className="fas fa-download" /> JSON
+          </Button>
         </div>
       </Container>
     </>
