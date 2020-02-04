@@ -29,8 +29,6 @@ import './App.css';
 import { KonvaEventObject } from 'konva/types/Node';
 import PixelArea from './components/PixelArea';
 
-const EYE_DROPPER_COLOR = 'eyedropper';
-
 const App = () => {
   const canvasSize = 300;
   const gridLength = parseInt(window.location.search.slice(1)) || 16;
@@ -47,17 +45,18 @@ const App = () => {
   const [pattern, setPattern] = useState('');
   const [replacement, setReplacement] = useState('');
   const [previewSize, setPreviewSize] = useState(gridLength * 2);
+  const [mode, setMode] = useState('draw');
 
   const stageRef = useRef() as RefObject<Stage>;
 
   const previewGridSize = previewSize / gridLength;
 
   const draw = (i: number) => {
-    if (dots[i] === color) {
+    if (dots[i] === color && mode === 'draw') {
       return;
     }
     const newDots = [...dots];
-    newDots[i] = color;
+    newDots[i] = mode === 'eraser' ? '' : color;
     setDots(newDots);
 
     addHistory(newDots);
@@ -176,8 +175,9 @@ const App = () => {
                 gridSize={gridSize}
                 isShowGrid={isShowGrid}
                 onMouseDown={(i: number) => {
-                  if (color === EYE_DROPPER_COLOR) {
+                  if (mode === 'eyedropper') {
                     setColor(dots[i]);
+                    setMode('draw');
                   } else {
                     setIsDrawing(true);
                     draw(i);
@@ -219,16 +219,16 @@ const App = () => {
                 </Button>
                 <Button
                   color="secondary"
-                  onClick={() => setColor('')}
-                  active={color === ''}
+                  onClick={() => setMode(mode === 'eraser' ? 'draw' : 'eraser')}
+                  active={mode === 'eraser'}
                   size="sm"
                 >
                   <i className="fas fa-eraser" />
                 </Button>
                 <Button
                   color="secondary"
-                  onClick={() => setColor(EYE_DROPPER_COLOR)}
-                  active={color === EYE_DROPPER_COLOR}
+                  onClick={() => setMode(mode === 'eyedropper' ? 'draw' : 'eyedropper')}
+                  active={mode === 'eyedropper'}
                   size="sm"
                 >
                   <i className="fas fa-eye-dropper" />

@@ -33,7 +33,7 @@ const PixelArea: React.FC<PixelAreaProps> = props => {
       width={width}
       height={height}
       className="bg-white border"
-      stageRef={stageRef}
+      ref={stageRef}
     >
       <Layer>
         {dots.map((dot, i) => (
