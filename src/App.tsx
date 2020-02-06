@@ -1,6 +1,7 @@
 import React, {
   useState,
   useRef,
+  useCallback,
   CSSProperties,
   RefObject,
   ChangeEvent,
@@ -24,6 +25,7 @@ import {
 import { Stage } from 'react-konva';
 import { fill, chunk, escapeRegExp } from 'lodash';
 import { ChromePicker } from 'react-color';
+import { useDropzone } from 'react-dropzone';
 
 import './App.css';
 import { KonvaEventObject } from 'konva/types/Node';
@@ -37,7 +39,7 @@ const App = () => {
   const [dots, setDots] = useState(fill(Array(gridLength ** 2), ''));
   const [isDrawing, setIsDrawing] = useState(false);
   const [isShowColorPicker, setIsShowColorPicker] = useState(false);
-  const [color, setColor] = useState('#000000');
+  const [color, setColor] = useState('rgba(0,0,0,1)');
   const [history, setHistory] = useState([dots]);
   const [historyStep, setHistoryStep] = useState(0);
   const [isShowGrid, setIsShowGrid] = useState(true);
@@ -46,6 +48,54 @@ const App = () => {
   const [replacement, setReplacement] = useState('');
   const [previewSize, setPreviewSize] = useState(gridLength * 2);
   const [mode, setMode] = useState('draw');
+
+  const onDrop = useCallback(acceptedFiles => {
+    const reader = new FileReader();
+
+    reader.onabort = () => console.log('file reading was aborted');
+    reader.onerror = () => console.log('file reading has failed');
+    reader.onload = () => {
+      const dataURL: any = reader.result;
+
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = gridLength;
+        canvas.height = gridLength;
+
+        const context: any = canvas.getContext('2d');
+        context.drawImage(
+          img,
+          0,
+          0,
+          img.naturalWidth,
+          img.naturalHeight,
+          0,
+          0,
+          gridLength,
+          gridLength
+        );
+        const imageData = context.getImageData(0, 0, gridLength, gridLength);
+
+        const newDots = [...dots];
+        for (let y = 0; y < gridLength; y++) {
+          for (let x = 0; x < gridLength; x++) {
+            const dotI = y * gridLength + x;
+            const dataI = dotI * 4;
+            const r = imageData.data[dataI];
+            const g = imageData.data[dataI + 1];
+            const b = imageData.data[dataI + 2];
+            const a = imageData.data[dataI + 2];
+            newDots[dotI] = `rgba(${r},${g},${b},${a})`;
+          }
+        }
+        setDots(newDots);
+      };
+      img.src = dataURL;
+    };
+    reader.readAsDataURL(acceptedFiles[0]);
+  }, []);
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const stageRef = useRef() as RefObject<Stage>;
 
@@ -204,7 +254,11 @@ const App = () => {
                   />
                   <ChromePicker
                     color={color}
-                    onChange={color => setColor(color.hex)}
+                    onChange={color =>
+                      setColor(
+                        `rgba(${color.rgb.r},${color.rgb.g},${color.rgb.b},${color.rgb.a})`
+                      )
+                    }
                   />
                 </div>
               ) : null}
@@ -272,6 +326,14 @@ const App = () => {
                 onMouseMove={() => {}}
                 stageRef={stageRef}
               />
+            </div>
+            <div {...getRootProps()} className="mt-3">
+              <input {...getInputProps()} />
+              {isDragActive ? (
+                <p>Drop the files here ...</p>
+              ) : (
+                <p>Drag 'n' drop some files here, or click to select files</p>
+              )}
             </div>
           </Col>
         </Row>
