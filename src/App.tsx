@@ -24,7 +24,7 @@ import {
 } from 'reactstrap';
 import { Stage } from 'react-konva';
 import { fill, chunk, escapeRegExp } from 'lodash';
-import { ChromePicker } from 'react-color';
+import { SketchPicker } from 'react-color';
 import { useDropzone } from 'react-dropzone';
 
 import './App.css';
@@ -49,52 +49,55 @@ const App = () => {
   const [previewSize, setPreviewSize] = useState(gridLength * 2);
   const [mode, setMode] = useState('draw');
 
-  const onDrop = useCallback(acceptedFiles => {
-    const reader = new FileReader();
+  const onDrop = useCallback(
+    acceptedFiles => {
+      const reader = new FileReader();
 
-    reader.onabort = () => console.log('file reading was aborted');
-    reader.onerror = () => console.log('file reading has failed');
-    reader.onload = () => {
-      const dataURL: any = reader.result;
+      reader.onabort = () => console.log('file reading was aborted');
+      reader.onerror = () => console.log('file reading has failed');
+      reader.onload = () => {
+        const dataURL: any = reader.result;
 
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = gridLength;
-        canvas.height = gridLength;
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = gridLength;
+          canvas.height = gridLength;
 
-        const context: any = canvas.getContext('2d');
-        context.drawImage(
-          img,
-          0,
-          0,
-          img.naturalWidth,
-          img.naturalHeight,
-          0,
-          0,
-          gridLength,
-          gridLength
-        );
-        const imageData = context.getImageData(0, 0, gridLength, gridLength);
+          const context: any = canvas.getContext('2d');
+          context.drawImage(
+            img,
+            0,
+            0,
+            img.naturalWidth,
+            img.naturalHeight,
+            0,
+            0,
+            gridLength,
+            gridLength
+          );
+          const imageData = context.getImageData(0, 0, gridLength, gridLength);
 
-        const newDots = [...dots];
-        for (let y = 0; y < gridLength; y++) {
-          for (let x = 0; x < gridLength; x++) {
-            const dotI = y * gridLength + x;
-            const dataI = dotI * 4;
-            const r = imageData.data[dataI];
-            const g = imageData.data[dataI + 1];
-            const b = imageData.data[dataI + 2];
-            const a = imageData.data[dataI + 2];
-            newDots[dotI] = `rgba(${r},${g},${b},${a})`;
+          const newDots = [...dots];
+          for (let y = 0; y < gridLength; y++) {
+            for (let x = 0; x < gridLength; x++) {
+              const dotI = y * gridLength + x;
+              const dataI = dotI * 4;
+              const r = imageData.data[dataI];
+              const g = imageData.data[dataI + 1];
+              const b = imageData.data[dataI + 2];
+              const a = imageData.data[dataI + 2];
+              newDots[dotI] = `rgba(${r},${g},${b},${a})`;
+            }
           }
-        }
-        setDots(newDots);
+          setDots(newDots);
+        };
+        img.src = dataURL;
       };
-      img.src = dataURL;
-    };
-    reader.readAsDataURL(acceptedFiles[0]);
-  }, []);
+      reader.readAsDataURL(acceptedFiles[0]);
+    },
+    [dots, gridLength]
+  );
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const stageRef = useRef() as RefObject<Stage>;
@@ -192,7 +195,7 @@ const App = () => {
     <>
       <Navbar color="light" light expand>
         <Container fluid>
-          <NavbarBrand href="/">Pixel Art</NavbarBrand>
+          <NavbarBrand href="/" className="text-pixel">ドット屋</NavbarBrand>
           <Nav className="ml-auto" navbar>
             <UncontrolledDropdown nav inNavbar>
               <DropdownToggle nav caret>
@@ -252,23 +255,56 @@ const App = () => {
                     style={coverStyle}
                     onClick={() => setIsShowColorPicker(false)}
                   />
-                  <ChromePicker
+                  <SketchPicker
                     color={color}
                     onChange={color =>
                       setColor(
                         `rgba(${color.rgb.r},${color.rgb.g},${color.rgb.b},${color.rgb.a})`
                       )
                     }
+                    presetColors={[
+                      '#F44336',
+                      '#E91E63',
+                      '#9C27B0',
+                      '#673AB7',
+                      '#3F51B5',
+                      '#2196F3',
+                      '#03A9F4',
+                      '#00BCD4',
+                      '#009688',
+                      '#4CAF50',
+                      '#8BC34A',
+                      '#CDDC39',
+                      '#FFEB3B',
+                      '#FFC107',
+                      '#FF9800',
+                      '#FF5722',
+                      '#795548',
+                      '#9E9E9E',
+                      '#607D8B',
+                      '#000000',
+                      '#FFFFFF',
+                    ]}
                   />
                 </div>
               ) : null}
             </div>
             <ButtonToolbar className="mb-3">
               <ButtonGroup>
-                <Button color="secondary" onClick={undo} size="sm">
+                <Button
+                  color="secondary"
+                  onClick={undo}
+                  size="sm"
+                  className="rounded-0"
+                >
                   <i className="fas fa-undo" />
                 </Button>
-                <Button color="secondary" onClick={redo} size="sm">
+                <Button
+                  color="secondary"
+                  onClick={redo}
+                  size="sm"
+                  className="rounded-0"
+                >
                   <i className="fas fa-redo" />
                 </Button>
                 <Button
@@ -276,14 +312,18 @@ const App = () => {
                   onClick={() => setMode(mode === 'eraser' ? 'draw' : 'eraser')}
                   active={mode === 'eraser'}
                   size="sm"
+                  className="rounded-0"
                 >
                   <i className="fas fa-eraser" />
                 </Button>
                 <Button
                   color="secondary"
-                  onClick={() => setMode(mode === 'eyedropper' ? 'draw' : 'eyedropper')}
+                  onClick={() =>
+                    setMode(mode === 'eyedropper' ? 'draw' : 'eyedropper')
+                  }
                   active={mode === 'eyedropper'}
                   size="sm"
+                  className="rounded-0"
                 >
                   <i className="fas fa-eye-dropper" />
                 </Button>
@@ -292,6 +332,7 @@ const App = () => {
                   onClick={() => setIsShowGrid(!isShowGrid)}
                   active={isShowGrid}
                   size="sm"
+                  className="rounded-0"
                 >
                   <i className="fas fa-border-all" />
                 </Button>
@@ -305,7 +346,7 @@ const App = () => {
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setPreviewSize(parseFloat(e.target.value) || previewSize)
                 }
-                className="mr-2"
+                className="mr-2 rounded-0 text-monospace"
                 bsSize="sm"
                 style={{ width: '4rem' }}
               />
@@ -327,13 +368,15 @@ const App = () => {
                 stageRef={stageRef}
               />
             </div>
-            <div {...getRootProps()} className="mt-3">
+            <div
+              {...getRootProps()}
+              className={`my-3 py-2 px-3 border rounded-0 text-pixel d-inline-block ${
+                isDragActive ? 'text-light bg-secondary' : ''
+              }`}
+              style={{ cursor: 'pointer' }}
+            >
               <input {...getInputProps()} />
-              {isDragActive ? (
-                <p>Drop the files here ...</p>
-              ) : (
-                <p>Drag 'n' drop some files here, or click to select files</p>
-              )}
+              <i className="fas fa-upload" /> アップロード
             </div>
           </Col>
         </Row>
@@ -343,6 +386,7 @@ const App = () => {
             value={text}
             onChange={onChangeText}
             rows={gridLength + 2}
+            className="rounded-0 text-monospace"
           />
         </div>
         <div className="mb-5 d-flex align-items-center">
@@ -352,6 +396,7 @@ const App = () => {
               setPattern(e.target.value)
             }
             bsSize="sm"
+            className="rounded-0 text-monospace"
           />
           <i className="fas fa-arrow-right mx-2" />
           <Input
@@ -360,6 +405,7 @@ const App = () => {
               setReplacement(e.target.value)
             }
             bsSize="sm"
+            className="rounded-0 text-monospace"
           />
           <Button
             color="secondary"
@@ -372,9 +418,9 @@ const App = () => {
               )
             }
             size="sm"
-            className="ml-2"
+            className="ml-2 text-nowrap rounded-0 text-pixel"
           >
-            Replace
+            置換
           </Button>
           <Button
             color="primary"
@@ -388,7 +434,7 @@ const App = () => {
               document.body.removeChild(link);
             }}
             size="sm"
-            className="ml-2 text-nowrap"
+            className="ml-2 text-nowrap rounded-0 text-pixel"
           >
             <i className="fas fa-download" /> JSON
           </Button>

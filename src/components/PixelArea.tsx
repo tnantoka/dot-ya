@@ -32,7 +32,7 @@ const PixelArea: React.FC<PixelAreaProps> = props => {
     <Stage
       width={width}
       height={height}
-      className="bg-white border"
+      className="bg-white border border-dark bg-stripes"
       ref={stageRef}
     >
       <Layer>
