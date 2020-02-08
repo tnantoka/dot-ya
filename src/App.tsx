@@ -46,7 +46,7 @@ const App = () => {
 
   const [pattern, setPattern] = useState('');
   const [replacement, setReplacement] = useState('');
-  const [previewSize, setPreviewSize] = useState(gridLength * 2);
+  const [previewSize, setPreviewSize] = useState(gridLength);
   const [mode, setMode] = useState('draw');
 
   const onDrop = useCallback(
@@ -204,12 +204,16 @@ const App = () => {
                 {gridLength} x {gridLength}
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem tag="a" href="/" active={gridLength === 16}>
-                  16 x 16
-                </DropdownItem>
-                <DropdownItem tag="a" href="/?32" active={gridLength === 32}>
-                  32 x 32
-                </DropdownItem>
+                {[16, 32].map(length => (
+                  <DropdownItem
+                    key={length}
+                    tag="a"
+                    href={length === 16 ? '.' : `/?${length}`}
+                    active={gridLength === length}
+                  >
+                    {length} x {length}
+                  </DropdownItem>
+                ))}
               </DropdownMenu>
             </UncontrolledDropdown>
           </Nav>
