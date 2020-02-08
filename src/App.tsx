@@ -194,8 +194,10 @@ const App = () => {
   return (
     <>
       <Navbar color="light" light expand>
-        <Container fluid>
-          <NavbarBrand href="/" className="text-pixel">ドット屋</NavbarBrand>
+        <Container>
+          <NavbarBrand href="/" className="text-pixel ml-sm-2 ml-md-3">
+            ドット屋
+          </NavbarBrand>
           <Nav className="ml-auto" navbar>
             <UncontrolledDropdown nav inNavbar>
               <DropdownToggle nav caret>
@@ -213,11 +215,11 @@ const App = () => {
           </Nav>
         </Container>
       </Navbar>
-      <Container fluid>
+      <Container>
         <Row>
           <Col>
             <div
-              className="d-flex justify-content-start py-4"
+              className="d-flex justify-content-center justify-content-md-end py-4"
               onMouseMove={() => setIsDrawing(false)}
             >
               <PixelArea
@@ -354,7 +356,7 @@ const App = () => {
                 <i className="fas fa-download" />
               </Button>
             </div>
-            <div className="d-flex justify-content-left">
+            <div className="d-flex justify-content-start">
               <PixelArea
                 width={previewSize}
                 height={previewSize}
