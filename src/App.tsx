@@ -204,7 +204,7 @@ const App = () => {
                 {gridLength} x {gridLength}
               </DropdownToggle>
               <DropdownMenu right>
-                {[16, 32].map(length => (
+                {[8, 16, 32].map(length => (
                   <DropdownItem
                     key={length}
                     tag="a"
